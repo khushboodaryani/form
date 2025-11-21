@@ -24,7 +24,10 @@ const initialForm: FormState = {
   disposition: "Customer Support",
 };
 
-export default function Home() {
+// Local uploaded image path (will be transformed to a URL by the environment)
+const UPLOADED_IMAGE = "/mnt/data/f083feee-e916-452f-b3e6-0c83bc51ee36.png";
+
+export default function EnquiryForm() {
   const [form, setForm] = useState<FormState>({ ...initialForm });
   const [status, setStatus] = useState<string>("idle");
   const [sending, setSending] = useState<boolean>(false);
@@ -35,14 +38,12 @@ export default function Home() {
     >
   ) => {
     const { name, value } = e.target;
-    // trim leading/trailing whitespace on text inputs
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setForm((p) => ({ ...p, [name]: value }));
   };
 
   const validate = (data: FormState) => {
     if (!data.name.trim()) return "Please enter your name.";
     if (!data.email.trim()) return "Please enter your email.";
-    // basic email regex
     const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRe.test(data.email.trim())) return "Please enter a valid email.";
     if (data.age && Number(data.age) < 0) return "Please enter a valid age.";
@@ -70,23 +71,19 @@ export default function Home() {
         email: form.email.trim(),
         contact: form.contact.trim(),
         query: form.query.trim(),
-        age: Number(form.age || 0),
+        age: form.age ? Number(form.age) : undefined,
       };
 
       const res = await fetch("/api/enquiry", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
       if (res.ok) {
-        const data = await res.json().catch(() => ({}));
         setStatus("Submitted successfully.");
         setForm({ ...initialForm });
       } else {
-        // try to parse json and surface message if present
         const data = await res.json().catch(() => ({}));
         setStatus(
           `Error submitting: ${data?.message ?? "Server returned an error"}`
@@ -99,155 +96,179 @@ export default function Home() {
     }
   };
 
-  const inputStyle: React.CSSProperties = {
-    width: "100%",
-    padding: "10px",
-    marginTop: 5,
-    marginBottom: 15,
-    borderRadius: 6,
-    border: "1px solid #ccc",
-    fontSize: 15,
-    boxSizing: "border-box",
-  };
-
-  const labelStyle: React.CSSProperties = {
-    fontWeight: 600,
-    marginBottom: 5,
-    display: "block",
-  };
-
-  const buttonStyle: React.CSSProperties = {
-    backgroundColor: "#0070f3",
-    color: "white",
-    padding: "12px 18px",
-    border: "none",
-    borderRadius: 6,
-    cursor: sending ? "not-allowed" : "pointer",
-    fontSize: 16,
-    width: "100%",
-    opacity: sending ? 0.7 : 1,
-  };
-
   return (
-    <div
-      style={{
-        maxWidth: 550,
-        margin: "40px auto",
-        padding: 25,
-        borderRadius: 10,
-        background: "#fafafa",
-        border: "1px solid #e5e5e5",
-      }}
-    >
-      <h1 style={{ textAlign: "center", marginBottom: 25 }}>
-        Multycomm Enquiry Form
-      </h1>
-
-      <form onSubmit={submitForm}>
-        <label style={labelStyle}>Name</label>
-        <input
-          style={inputStyle}
-          name="name"
-          value={form.name}
-          onChange={handleChange}
-          required
-          placeholder="Full name"
-        />
-
-        <label style={labelStyle}>Company</label>
-        <input
-          style={inputStyle}
-          name="company"
-          value={form.company}
-          onChange={handleChange}
-          placeholder="Company (optional)"
-        />
-
-        <label style={labelStyle}>Gender</label>
-        <select
-          style={inputStyle}
-          name="gender"
-          value={form.gender}
-          onChange={handleChange}
-        >
-          <option value="Male">Male</option>
-          <option value="Female">Female</option>
-          <option value="Other">Other</option>
-        </select>
-
-        <label style={labelStyle}>Age</label>
-        <input
-          style={inputStyle}
-          name="age"
-          value={form.age}
-          onChange={handleChange}
-          type="number"
-          min={0}
-          placeholder="Age (optional)"
-        />
-
-        <label style={labelStyle}>Email</label>
-        <input
-          style={inputStyle}
-          name="email"
-          value={form.email}
-          onChange={handleChange}
-          type="email"
-          required
-          placeholder="you@example.com"
-        />
-
-        <label style={labelStyle}>Contact Number</label>
-        <input
-          style={inputStyle}
-          name="contact"
-          value={form.contact}
-          onChange={handleChange}
-          type="tel"
-          placeholder="Phone (optional)"
-        />
-
-        <label style={labelStyle}>Query</label>
-        <textarea
-          style={{ ...inputStyle, height: 80 }}
-          name="query"
-          value={form.query}
-          onChange={handleChange}
-          placeholder="Write your query or message here"
-        />
-
-        <label style={labelStyle}>Disposition</label>
-        <select
-          style={inputStyle}
-          name="disposition"
-          value={form.disposition}
-          onChange={handleChange}
-        >
-          <option value="Customer Support">Customer Support</option>
-          <option value="Consultant Support">Consultant Support</option>
-          <option value="B2B Lead">B2B Lead</option>
-          <option value="New Lead">New Lead</option>
-          <option value="General Enquiry">General Enquiry</option>
-        </select>
-
-        <div style={{ marginTop: 12 }}>
-          <button style={buttonStyle} type="submit" disabled={sending}>
-            {sending ? "Sending..." : "Submit"}
-          </button>
+    <div className="min-h-screen bg-gray-900 flex items-center justify-center p-6">
+      <div className="max-w-4xl w-full grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Left: image / branding */}
+        <div className="hidden md:flex items-center justify-center">
+          <div className="w-full h-full rounded-2xl overflow-hidden shadow-2xl bg-gradient-to-tr from-slate-800 to-slate-700">
+            <img
+              src={UPLOADED_IMAGE}
+              alt="form preview"
+              className="object-cover w-full h-full opacity-90"
+            />
+          </div>
         </div>
-      </form>
 
-      <div
-        style={{
-          marginTop: 15,
-          textAlign: "center",
-          fontWeight: 600,
-          color: "#333",
-        }}
-        role="status"
-        aria-live="polite"
-      >
-        Status: {status || "idle"}
+        {/* Right: form card */}
+        <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-8 shadow-xl">
+          <h2 className="text-2xl font-semibold text-gray-800 text-center mb-4">
+            Multycomm Enquiry
+          </h2>
+          <p className="text-sm text-gray-500 text-center mb-6">
+            Quick enquiry — we will get back within 24 hours
+          </p>
+
+          <form onSubmit={submitForm} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Name *
+              </label>
+              <input
+                name="name"
+                value={form.name}
+                onChange={handleChange}
+                placeholder="Full name"
+                className="w-full rounded-md border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Company
+              </label>
+              <input
+                name="company"
+                value={form.company}
+                onChange={handleChange}
+                placeholder="Company (optional)"
+                className="w-full rounded-md border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Gender
+                </label>
+                <select
+                  name="gender"
+                  value={form.gender}
+                  onChange={handleChange}
+                  className="w-full rounded-md border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                >
+                  <option>Male</option>
+                  <option>Female</option>
+                  <option>Other</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Age
+                </label>
+                <input
+                  name="age"
+                  value={form.age}
+                  onChange={handleChange}
+                  type="number"
+                  min={0}
+                  placeholder="Age"
+                  className="w-full rounded-md border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Email *
+              </label>
+              <input
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                type="email"
+                placeholder="you@example.com"
+                className="w-full rounded-md border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Contact Number
+              </label>
+              <input
+                name="contact"
+                value={form.contact}
+                onChange={handleChange}
+                type="tel"
+                placeholder="Phone (optional)"
+                className="w-full rounded-md border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Query
+              </label>
+              <textarea
+                name="query"
+                value={form.query}
+                onChange={handleChange}
+                placeholder="Write your query or message here"
+                className="w-full rounded-md border border-gray-200 px-3 py-2 h-28 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Disposition
+              </label>
+              <select
+                name="disposition"
+                value={form.disposition}
+                onChange={handleChange}
+                className="w-full rounded-md border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              >
+                <option>Customer Support</option>
+                <option>Consultant Support</option>
+                <option>B2B Lead</option>
+                <option>New Lead</option>
+                <option>General Enquiry</option>
+              </select>
+            </div>
+
+            <div className="pt-2">
+              <button
+                type="submit"
+                disabled={sending}
+                className={`w-full rounded-md py-3 font-medium text-white transition-shadow ${
+                  sending
+                    ? "bg-indigo-300 cursor-not-allowed"
+                    : "bg-indigo-600 hover:shadow-lg"
+                }`}
+                aria-busy={sending}
+              >
+                {sending ? "Sending..." : "Submit Enquiry"}
+              </button>
+            </div>
+          </form>
+
+          <div
+            className="mt-4 text-center text-sm text-gray-600 font-medium"
+            role="status"
+            aria-live="polite"
+          >
+            Status: <span className="text-gray-800">{status || "idle"}</span>
+          </div>
+
+          <div className="mt-4 text-xs text-gray-400 text-center">
+            We respect your privacy — your data will only be used to contact you
+            regarding this enquiry.
+          </div>
+        </div>
       </div>
     </div>
   );
