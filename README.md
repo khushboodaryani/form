@@ -27,6 +27,18 @@ Users can submit form data, which gets stored in a database, and can be viewed i
 /prisma
 └── schema.prisma → Database models
 
+.env.example
+# Database (SQLite for local)
+DATABASE_URL="file:./dev.db"
+
+# SMTP (Gmail example - use app password)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your@gmail.com
+SMTP_PASS=your_app_password
+EMAIL_FROM=your@gmail.com
+
 ---
 
 ## ⚙️ Setup & Installation

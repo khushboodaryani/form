@@ -27,7 +27,6 @@ export async function POST(req: NextRequest) {
         disposition: string;
       };
 
-    // Basic validation
     if (!name || !email || !disposition) {
       return NextResponse.json(
         {
@@ -38,7 +37,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Save to DB
     const saved = await prisma.enquiry.create({
       data: {
         name,
@@ -52,15 +50,13 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Email logic: send only if disposition maps to an email
     const to = dispositionToEmail[disposition] ?? null;
 
     if (to) {
-      // Create transporter (SMTP)
       const transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST,
         port: Number(process.env.SMTP_PORT ?? 587),
-        secure: process.env.SMTP_SECURE === "true", // true for 465
+        secure: process.env.SMTP_SECURE === "true",
         auth: {
           user: process.env.SMTP_USER,
           pass: process.env.SMTP_PASS,

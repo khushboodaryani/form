@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState } from "react";
@@ -29,7 +28,9 @@ export default function Home() {
   const [status, setStatus] = useState<string>("");
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -45,10 +46,7 @@ export default function Home() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          ...form,
-          age: Number(form.age || 0), // ensure age sent as number if backend expects number
-        }),
+        body: JSON.stringify({ ...form, age: Number(form.age || 0) }),
       });
 
       if (res.ok) {
@@ -65,54 +63,98 @@ export default function Home() {
         });
       } else {
         const data = await res.json().catch(() => ({}));
-        setStatus(
-          `Error submitting: ${data?.message ?? "Server responded with an error"}`
-        );
+        setStatus(`Error submitting: ${data?.message ?? "Server error"}`);
       }
     } catch (err: any) {
       setStatus(`Error submitting: ${err?.message ?? "Network error"}`);
     }
   };
 
+  const inputStyle: React.CSSProperties = {
+    width: "100%",
+    padding: "10px",
+    marginTop: 5,
+    marginBottom: 15,
+    borderRadius: 6,
+    border: "1px solid #ccc",
+    fontSize: 15,
+    boxSizing: "border-box",
+  };
+
+  const labelStyle: React.CSSProperties = {
+    fontWeight: 600,
+    marginBottom: 5,
+    display: "block",
+  };
+
+  const buttonStyle: React.CSSProperties = {
+    backgroundColor: "#0070f3",
+    color: "white",
+    padding: "12px 18px",
+    border: "none",
+    borderRadius: 6,
+    cursor: "pointer",
+    fontSize: 16,
+    width: "100%",
+  };
+
   return (
-    <div style={{ maxWidth: 700, margin: "40px auto", padding: 20 }}>
-      <h1>Multycomm Enquiry Form</h1>
+    <div
+      style={{
+        maxWidth: 550,
+        margin: "40px auto",
+        padding: 25,
+        borderRadius: 10,
+        background: "#fafafa",
+        border: "1px solid #e5e5e5",
+      }}
+    >
+      <h1 style={{ textAlign: "center", marginBottom: 25 }}>
+        Multycomm Enquiry Form
+      </h1>
 
       <form onSubmit={submitForm}>
-        <label>Name</label>
+        <label style={labelStyle}>Name</label>
         <input
+          style={inputStyle}
           name="name"
           value={form.name}
           onChange={handleChange}
           required
         />
 
-        <label>Company</label>
+        <label style={labelStyle}>Company</label>
         <input
+          style={inputStyle}
           name="company"
           value={form.company}
           onChange={handleChange}
-          required
         />
 
-        <label>Gender</label>
-        <select name="gender" value={form.gender} onChange={handleChange}>
+        <label style={labelStyle}>Gender</label>
+        <select
+          style={inputStyle}
+          name="gender"
+          value={form.gender}
+          onChange={handleChange}
+        >
           <option value="Male">Male</option>
           <option value="Female">Female</option>
           <option value="Other">Other</option>
         </select>
 
-        <label>Age</label>
+        <label style={labelStyle}>Age</label>
         <input
+          style={inputStyle}
           name="age"
           value={form.age}
           onChange={handleChange}
           type="number"
-          required
         />
 
-        <label>Email</label>
+        <label style={labelStyle}>Email</label>
         <input
+          style={inputStyle}
           name="email"
           value={form.email}
           onChange={handleChange}
@@ -120,24 +162,26 @@ export default function Home() {
           required
         />
 
-        <label>Contact number</label>
+        <label style={labelStyle}>Contact Number</label>
         <input
+          style={inputStyle}
           name="contact"
           value={form.contact}
           onChange={handleChange}
           type="tel"
-          required
         />
 
-        <label>Query</label>
+        <label style={labelStyle}>Query</label>
         <textarea
+          style={{ ...inputStyle, height: 80 }}
           name="query"
           value={form.query}
           onChange={handleChange}
-        ></textarea>
+        />
 
-        <label>Disposition</label>
+        <label style={labelStyle}>Disposition</label>
         <select
+          style={inputStyle}
           name="disposition"
           value={form.disposition}
           onChange={handleChange}
@@ -150,11 +194,22 @@ export default function Home() {
         </select>
 
         <div style={{ marginTop: 12 }}>
-          <button type="submit">Submit</button>
+          <button style={buttonStyle} type="submit">
+            Submit
+          </button>
         </div>
       </form>
 
-      <div style={{ marginTop: 12 }}>Status: {status || "idle"}</div>
+      <div
+        style={{
+          marginTop: 15,
+          textAlign: "center",
+          fontWeight: 600,
+          color: "#333",
+        }}
+      >
+        Status: {status || "idle"}
+      </div>
     </div>
   );
 }
