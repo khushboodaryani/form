@@ -13,19 +13,21 @@ type FormState = {
   disposition: string;
 };
 
-export default function Home() {
-  const [form, setForm] = useState<FormState>({
-    name: "",
-    company: "",
-    gender: "Male",
-    age: "",
-    email: "",
-    contact: "",
-    query: "",
-    disposition: "Customer Support",
-  });
+const initialForm: FormState = {
+  name: "",
+  company: "",
+  gender: "Male",
+  age: "",
+  email: "",
+  contact: "",
+  query: "",
+  disposition: "Customer Support",
+};
 
-  const [status, setStatus] = useState<string>("");
+export default function Home() {
+  const [form, setForm] = useState<FormState>({ ...initialForm });
+  const [status, setStatus] = useState<string>("idle");
+  const [sending, setSending] = useState<boolean>(false);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -33,40 +35,67 @@ export default function Home() {
     >
   ) => {
     const { name, value } = e.target;
+    // trim leading/trailing whitespace on text inputs
     setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const validate = (data: FormState) => {
+    if (!data.name.trim()) return "Please enter your name.";
+    if (!data.email.trim()) return "Please enter your email.";
+    // basic email regex
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRe.test(data.email.trim())) return "Please enter a valid email.";
+    if (data.age && Number(data.age) < 0) return "Please enter a valid age.";
+    return null;
   };
 
   const submitForm = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (sending) return;
+    setStatus("Validating...");
+    const err = validate(form);
+    if (err) {
+      setStatus(err);
+      return;
+    }
+
+    setSending(true);
     setStatus("Sending...");
 
     try {
+      const payload = {
+        ...form,
+        name: form.name.trim(),
+        company: form.company.trim(),
+        email: form.email.trim(),
+        contact: form.contact.trim(),
+        query: form.query.trim(),
+        age: Number(form.age || 0),
+      };
+
       const res = await fetch("/api/enquiry", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ ...form, age: Number(form.age || 0) }),
+        body: JSON.stringify(payload),
       });
 
       if (res.ok) {
-        setStatus("Submitted Successfully");
-        setForm({
-          name: "",
-          company: "",
-          gender: "Male",
-          age: "",
-          email: "",
-          contact: "",
-          query: "",
-          disposition: "Customer Support",
-        });
-      } else {
         const data = await res.json().catch(() => ({}));
-        setStatus(`Error submitting: ${data?.message ?? "Server error"}`);
+        setStatus("Submitted successfully.");
+        setForm({ ...initialForm });
+      } else {
+        // try to parse json and surface message if present
+        const data = await res.json().catch(() => ({}));
+        setStatus(
+          `Error submitting: ${data?.message ?? "Server returned an error"}`
+        );
       }
     } catch (err: any) {
-      setStatus(`Error submitting: ${err?.message ?? "Network error"}`);
+      setStatus(`Network error: ${err?.message ?? "Unknown error"}`);
+    } finally {
+      setSending(false);
     }
   };
 
@@ -93,9 +122,10 @@ export default function Home() {
     padding: "12px 18px",
     border: "none",
     borderRadius: 6,
-    cursor: "pointer",
+    cursor: sending ? "not-allowed" : "pointer",
     fontSize: 16,
     width: "100%",
+    opacity: sending ? 0.7 : 1,
   };
 
   return (
@@ -121,6 +151,7 @@ export default function Home() {
           value={form.name}
           onChange={handleChange}
           required
+          placeholder="Full name"
         />
 
         <label style={labelStyle}>Company</label>
@@ -129,6 +160,7 @@ export default function Home() {
           name="company"
           value={form.company}
           onChange={handleChange}
+          placeholder="Company (optional)"
         />
 
         <label style={labelStyle}>Gender</label>
@@ -150,6 +182,8 @@ export default function Home() {
           value={form.age}
           onChange={handleChange}
           type="number"
+          min={0}
+          placeholder="Age (optional)"
         />
 
         <label style={labelStyle}>Email</label>
@@ -160,6 +194,7 @@ export default function Home() {
           onChange={handleChange}
           type="email"
           required
+          placeholder="you@example.com"
         />
 
         <label style={labelStyle}>Contact Number</label>
@@ -169,6 +204,7 @@ export default function Home() {
           value={form.contact}
           onChange={handleChange}
           type="tel"
+          placeholder="Phone (optional)"
         />
 
         <label style={labelStyle}>Query</label>
@@ -177,6 +213,7 @@ export default function Home() {
           name="query"
           value={form.query}
           onChange={handleChange}
+          placeholder="Write your query or message here"
         />
 
         <label style={labelStyle}>Disposition</label>
@@ -194,8 +231,8 @@ export default function Home() {
         </select>
 
         <div style={{ marginTop: 12 }}>
-          <button style={buttonStyle} type="submit">
-            Submit
+          <button style={buttonStyle} type="submit" disabled={sending}>
+            {sending ? "Sending..." : "Submit"}
           </button>
         </div>
       </form>
@@ -207,6 +244,8 @@ export default function Home() {
           fontWeight: 600,
           color: "#333",
         }}
+        role="status"
+        aria-live="polite"
       >
         Status: {status || "idle"}
       </div>

@@ -1,7 +1,11 @@
+// app/api/enquiry/route.ts
+export const runtime = "nodejs";
+
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { prisma } from "@/lib/prisma";
-import nodemailer from "nodemailer";
+
+// Keep top-level minimal — do NOT import prisma or nodemailer here.
+// We'll require them lazily inside the handler to avoid module-eval issues.
 
 const dispositionToEmail: Record<string, string | null> = {
   "Customer Support": "ayan@multycomm.com",
@@ -13,6 +17,9 @@ const dispositionToEmail: Record<string, string | null> = {
 
 export async function POST(req: NextRequest) {
   try {
+    const { prisma } = require("@/lib/prisma") as { prisma: any };
+    const nodemailer = require("nodemailer") as typeof import("nodemailer");
+
     const body = await req.json();
 
     const { name, company, gender, age, email, contact, query, disposition } =
@@ -37,6 +44,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // create record
     const saved = await prisma.enquiry.create({
       data: {
         name,
