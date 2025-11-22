@@ -156,7 +156,7 @@ export default function EnquiryForm() {
                 value={form.name}
                 onChange={handleChange}
                 placeholder="Full name"
-                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors"
+                className="w-full rounded-md border text-black border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors"
                 required
                 disabled={sending}
               />
@@ -171,7 +171,7 @@ export default function EnquiryForm() {
                 value={form.company}
                 onChange={handleChange}
                 placeholder="Company (optional)"
-                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors"
+                className="w-full rounded-md border border-gray-300 text-black px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors"
                 disabled={sending}
               />
             </div>
@@ -185,7 +185,7 @@ export default function EnquiryForm() {
                   name="gender"
                   value={form.gender}
                   onChange={handleChange}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors"
+                  className="w-full rounded-md border border-gray-300 text-black px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors"
                   disabled={sending}
                 >
                   <option value="Male">Male</option>
@@ -207,7 +207,7 @@ export default function EnquiryForm() {
                   min="0"
                   max="120"
                   placeholder="Age"
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors"
+                  className="w-full rounded-md border border-gray-300 text-black px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors"
                   disabled={sending}
                 />
               </div>
@@ -223,7 +223,7 @@ export default function EnquiryForm() {
                 onChange={handleChange}
                 type="email"
                 placeholder="you@example.com"
-                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors"
+                className="w-full rounded-md border border-gray-300 text-black px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors"
                 required
                 disabled={sending}
               />
@@ -239,7 +239,7 @@ export default function EnquiryForm() {
                 onChange={handleChange}
                 type="tel"
                 placeholder="Phone (optional)"
-                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors"
+                className="w-full rounded-md border border-gray-300 text-black px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors"
                 disabled={sending}
               />
             </div>
@@ -253,7 +253,7 @@ export default function EnquiryForm() {
                 value={form.query}
                 onChange={handleChange}
                 placeholder="Write your query or message here..."
-                className="w-full rounded-md border border-gray-300 px-3 py-2 h-28 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors"
+                className="w-full rounded-md border border-gray-300 text-black px-3 py-2 h-28 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors"
                 disabled={sending}
               />
             </div>
@@ -266,7 +266,7 @@ export default function EnquiryForm() {
                 name="disposition"
                 value={form.disposition}
                 onChange={handleChange}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors"
+                className="w-full rounded-md border border-gray-300 text-black px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors"
                 required
                 disabled={sending}
               >
