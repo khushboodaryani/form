@@ -1,7 +1,6 @@
 // prisma/schema.prisma
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -14,7 +13,7 @@ model Enquiry {
   name        String
   company     String
   gender      String
-  age         Int? // Changed from String to Int?
+  age         Int?
   email       String
   contact     String
   query       String
