@@ -1,11 +1,9 @@
 // app/api/enquiry/route.ts
-export const runtime = "nodejs";
-
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-// Keep top-level minimal — do NOT import prisma or nodemailer here.
-// We'll require them lazily inside the handler to avoid module-eval issues.
+// Simple in-memory storage for testing (remove this in production)
+const enquiries: any[] = [];
 
 const dispositionToEmail: Record<string, string | null> = {
   "Customer Support": "ayan@multycomm.com",
@@ -17,24 +15,17 @@ const dispositionToEmail: Record<string, string | null> = {
 
 export async function POST(req: NextRequest) {
   try {
-    const { prisma } = require("@/lib/prisma") as { prisma: any };
-    const nodemailer = require("nodemailer") as typeof import("nodemailer");
+    console.log("API: Received enquiry request");
 
     const body = await req.json();
+    console.log("API: Request body:", body);
 
     const { name, company, gender, age, email, contact, query, disposition } =
-      body as {
-        name: string;
-        company?: string;
-        gender?: string;
-        age?: number | string;
-        email: string;
-        contact?: string;
-        query?: string;
-        disposition: string;
-      };
+      body;
 
+    // Validation
     if (!name || !email || !disposition) {
+      console.log("API: Missing required fields");
       return NextResponse.json(
         {
           ok: false,
@@ -44,63 +35,57 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // create record
-    const saved = await prisma.enquiry.create({
-      data: {
-        name,
-        company: company ?? "",
-        gender: gender ?? "",
-        age: Number(age || 0),
-        email,
-        contact: contact ?? "",
-        query: query ?? "",
-        disposition,
-      },
-    });
+    // Create enquiry object
+    const enquiry = {
+      id: Date.now().toString(),
+      name: name.trim(),
+      company: (company || "").trim(),
+      gender: gender || "Male",
+      age: age ? parseInt(age) : null,
+      email: email.trim(),
+      contact: (contact || "").trim(),
+      query: (query || "").trim(),
+      disposition,
+      createdAt: new Date(),
+    };
 
-    const to = dispositionToEmail[disposition] ?? null;
+    console.log("API: Created enquiry:", enquiry);
 
+    // Store in memory (replace with database later)
+    enquiries.push(enquiry);
+
+    // Email logic (simplified for testing)
+    const to = dispositionToEmail[disposition];
     if (to) {
-      const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: Number(process.env.SMTP_PORT ?? 587),
-        secure: process.env.SMTP_SECURE === "true",
-        auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS,
-        },
-      });
-
-      const subject = "New Client Enquiry from MultyComm Form";
-      const text = `
-Greetings!
-
-We have received an inquiry for the client detailed below. Please provide them with the necessary assistance.
-
-Client/Caller Name: ${name}
-Company: ${company ?? ""}
-Gender: ${gender ?? ""}
-Age: ${age ?? ""}
-Email: ${email}
-Query: ${query ?? ""}
-
-Thank You!
-      `;
-
-      await transporter.sendMail({
-        from: process.env.EMAIL_FROM ?? process.env.SMTP_USER,
-        to,
-        subject,
-        text,
-      });
+      console.log(`API: Would send email to: ${to}`);
+      // Email sending disabled for testing
     }
 
-    return NextResponse.json({ ok: true, id: saved.id });
+    console.log("API: Enquiry saved successfully");
+
+    return NextResponse.json({
+      ok: true,
+      id: enquiry.id,
+      message: "Enquiry submitted successfully",
+    });
   } catch (err: any) {
-    console.error("API /api/enquiry error:", err);
+    console.error("API Error details:", err);
     return NextResponse.json(
-      { ok: false, message: err?.message ?? "Server error" },
+      {
+        ok: false,
+        message: err?.message || "Internal server error",
+        stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
+      },
       { status: 500 }
     );
   }
+}
+
+// Optional: GET endpoint to see stored enquiries (for testing)
+export async function GET() {
+  return NextResponse.json({
+    ok: true,
+    enquiries,
+    count: enquiries.length,
+  });
 }

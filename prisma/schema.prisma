@@ -1,18 +1,20 @@
+// prisma/schema.prisma
 generator client {
   provider = "prisma-client-js"
+  output   = "../generated/prisma"
 }
 
 datasource db {
-  provider = "mongodb"
-  // url was removed because Prisma v7 expects connection config in prisma.config.ts
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Enquiry {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  id          String   @id @default(cuid())
   name        String
   company     String
   gender      String
-  age         Int
+  age         Int? // Changed from String to Int?
   email       String
   contact     String
   query       String
